@@ -55,41 +55,37 @@ func (m *HmmModel) loadModel(filePath string) {
 	scanner := fileReader.NewScanner(filePath)
 	var (
 		line string
-		ok   bool
 		err  error
 	)
 	cnt := 0
-	for {
-		if line, ok = scanner.Next(); ok {
-			if cnt == 0 {
-				tmp := strings.Split(line, " ")
-				for i, v := range tmp {
-					m.startProb[i], err = strconv.ParseFloat(v, 64)
-					if err != nil {
-						panic(tmp[i])
-					}
+	for scanner.HasNext() {
+		line = scanner.Next()
+		if cnt == 0 {
+			tmp := strings.Split(line, " ")
+			for i, v := range tmp {
+				m.startProb[i], err = strconv.ParseFloat(v, 64)
+				if err != nil {
+					panic(tmp[i])
 				}
-			} else if cnt <= statusSum {
-				tmp := strings.Split(line, " ")
-				for i, v := range tmp {
-					m.transProb[cnt-1][i], err = strconv.ParseFloat(v, 64)
-				}
-			} else if cnt-statusSum == 1 {
-				m.loadEmitProb(line, m.emitProbMapBeg)
-			} else if cnt-statusSum == 2 {
-				m.loadEmitProb(line, m.emitProbMapEnd)
-			} else if cnt-statusSum == 3 {
-				m.loadEmitProb(line, m.emitProbMapMid)
-			} else if cnt-statusSum == 4 {
-				m.loadEmitProb(line, m.emitProbMapSep)
-			} else {
-				break
 			}
-
-			cnt++
+		} else if cnt <= statusSum {
+			tmp := strings.Split(line, " ")
+			for i, v := range tmp {
+				m.transProb[cnt-1][i], err = strconv.ParseFloat(v, 64)
+			}
+		} else if cnt-statusSum == 1 {
+			m.loadEmitProb(line, m.emitProbMapBeg)
+		} else if cnt-statusSum == 2 {
+			m.loadEmitProb(line, m.emitProbMapEnd)
+		} else if cnt-statusSum == 3 {
+			m.loadEmitProb(line, m.emitProbMapMid)
+		} else if cnt-statusSum == 4 {
+			m.loadEmitProb(line, m.emitProbMapSep)
 		} else {
 			break
 		}
+
+		cnt++
 	}
 }
 

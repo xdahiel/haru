@@ -1,11 +1,14 @@
 package main
 
 import (
+	"flag"
+	"fmt"
 	"haru/common"
-	"haru/user"
 )
 
 func main() {
 	common.Init()
-	user.Init()
+	//user.Init()
+	flag.Parse()
+	fmt.Println(common.JwtSecret)
 }

@@ -1,8 +1,8 @@
 package model
 
 import (
-	"haru/common"
 	"github.com/google/uuid"
+	"haru/common"
 	"log"
 	"time"
 )
@@ -15,7 +15,7 @@ type User struct {
 }
 
 func InitUser() {
-	db := common.DB()
+	db := common.GetMysqlDB()
 	err := db.AutoMigrate(&User{})
 	if err != nil {
 		log.Fatalln("create user table failed")
@@ -23,7 +23,7 @@ func InitUser() {
 }
 
 func Add(username, password string) error {
-	db := common.DB()
+	db := common.GetMysqlDB()
 	return db.Model(&User{}).Create(User{
 		ID:          uuid.NewString(),
 		Username:    username,

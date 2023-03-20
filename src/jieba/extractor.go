@@ -145,7 +145,6 @@ func (e *Extractor) extract(sentence types.Rune, topN int) []string {
 func (e *Extractor) loadIdfDict(idfPath string) {
 	var (
 		line   string
-		ok     bool
 		idf    float64
 		err    error
 		idfSum = 0.0
@@ -153,27 +152,24 @@ func (e *Extractor) loadIdfDict(idfPath string) {
 	)
 
 	scanner := fileReader.NewScanner(idfPath)
-	for {
-		if line, ok = scanner.Next(); ok {
-			if len(line) == 0 {
-				log.Println("skipped at ", cnt, ", line: ", line)
-				continue
-			}
-			buf := strings.Split(line, " ")
-			if len(buf) != 2 {
-				log.Println("skipped at ", cnt, ", line: ", line)
-				continue
-			}
-			idf, err = strconv.ParseFloat(buf[1], 64)
-			if err != nil {
-				panic(err)
-			}
-			e.idfMap[buf[1]] = idf
-			idfSum += idf
-			cnt++
-		} else {
-			break
+	for scanner.HasNext() {
+		line = scanner.Next()
+		if len(line) == 0 {
+			log.Println("skipped at ", cnt, ", line: ", line)
+			continue
 		}
+		buf := strings.Split(line, " ")
+		if len(buf) != 2 {
+			log.Println("skipped at ", cnt, ", line: ", line)
+			continue
+		}
+		idf, err = strconv.ParseFloat(buf[1], 64)
+		if err != nil {
+			panic(err)
+		}
+		e.idfMap[buf[1]] = idf
+		idfSum += idf
+		cnt++
 	}
 
 	if cnt == 0 {
@@ -186,19 +182,13 @@ func (e *Extractor) loadIdfDict(idfPath string) {
 }
 
 func (e *Extractor) loadStopWordDict(filePath string) {
-	var (
-		line string
-		ok   bool
-	)
+	var line string
 
 	e.stopWords = make(wordSet)
 	scanner := fileReader.NewScanner(filePath)
-	for {
-		if line, ok = scanner.Next(); ok {
-			e.stopWords.insert(line)
-		} else {
-			break
-		}
+	for scanner.HasNext() {
+		line = scanner.Next()
+		e.stopWords.insert(line)
 	}
 }
 

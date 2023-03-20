@@ -7,19 +7,19 @@ import (
 )
 
 var (
-	db *gorm.DB
+	mysqlDB *gorm.DB
 )
 
-func InitOrm() {
-	dsn := "root:root@tcp(localhost)/chun_search?charset=utf8mb4&parseTime=True&loc=Local"
+func InitMysqlOrm() {
+	dsn := "root:root@tcp(localhost)/haru?charset=utf8mb4&parseTime=True&loc=Local"
 	gormDB, err := gorm.Open(mysql.Open(dsn), &gorm.Config{})
 
 	if err != nil {
 		log.Fatalln("Failed connect to mysql")
 	}
-	db = gormDB
+	mysqlDB = gormDB
 }
 
-func DB() *gorm.DB {
-	return db
+func GetMysqlDB() *gorm.DB {
+	return mysqlDB
 }

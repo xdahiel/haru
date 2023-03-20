@@ -73,50 +73,38 @@ func (dt *DictTrie) has(word Rune) bool {
 
 func (dt *DictTrie) loadDict(dictPath string) {
 	s := fileReader.NewScanner(dictPath)
-	var (
-		line string
-		ok   bool
-	)
+	var line string
 
-	for {
-		if line, ok = s.Next(); ok {
-			tmp := strings.Split(line, " ")
-			if len(tmp) != dictColumnNum {
-				panic(line)
-			}
-
-			weight, err := strconv.ParseFloat(tmp[1], 64)
-			if err != nil {
-				panic(tmp[1])
-			}
-			dt.staticNodeInfo = append(dt.staticNodeInfo, DictUnit{
-				word:   Rune(tmp[0]),
-				weight: weight,
-				tag:    Rune(tmp[2]),
-			})
-		} else {
-			break
+	for s.HasNext() {
+		line = s.Next()
+		tmp := strings.Split(line, " ")
+		if len(tmp) != dictColumnNum {
+			panic(line)
 		}
+
+		weight, err := strconv.ParseFloat(tmp[1], 64)
+		if err != nil {
+			panic(tmp[1])
+		}
+		dt.staticNodeInfo = append(dt.staticNodeInfo, DictUnit{
+			word:   Rune(tmp[0]),
+			weight: weight,
+			tag:    Rune(tmp[2]),
+		})
 	}
 }
 
 func (dt *DictTrie) loadUserDict(userDictPath string) {
 	files := strings.Split(userDictPath, "|;")
 	for _, v := range files {
-		var (
-			line string
-			ok   bool
-		)
+		var line string
 		s := fileReader.NewScanner(v)
-		for {
-			if line, ok = s.Next(); ok {
-				if len(line) == 0 {
-					continue
-				}
-				dt.insertUserDictNode(line)
-			} else {
-				break
+		for s.HasNext() {
+			line = s.Next()
+			if len(line) == 0 {
+				continue
 			}
+			dt.insertUserDictNode(line)
 		}
 	}
 }

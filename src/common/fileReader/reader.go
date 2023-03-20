@@ -7,7 +7,8 @@ import (
 )
 
 type Scanner struct {
-	r *bufio.Reader
+	r    *bufio.Reader
+	line *string
 }
 
 func NewScanner(path string) *Scanner {
@@ -18,14 +19,15 @@ func NewScanner(path string) *Scanner {
 	}
 	r := bufio.NewReader(f)
 	return &Scanner{
-		r: r,
+		r:    r,
+		line: nil,
 	}
 }
 
-func (s *Scanner) Next() (string, bool) {
+func (s *Scanner) HasNext() bool {
 	line, isPrefix, err := s.r.ReadLine()
 	if err != nil {
-		return "", false
+		return false
 	}
 
 	res := string(line)
@@ -34,5 +36,13 @@ func (s *Scanner) Next() (string, bool) {
 		res += string(line)
 	}
 
-	return res, true
+	s.line = &res
+
+	return true
+}
+
+func (s *Scanner) Next() string {
+	line := s.line
+	s.line = nil
+	return *line
 }

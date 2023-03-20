@@ -7,16 +7,8 @@ type StopWordFilter map[string]struct{}
 func NewStopWordFilter(stopWordDict string) StopWordFilter {
 	scanner := fileReader.NewScanner(stopWordDict)
 	f := make(StopWordFilter)
-	var (
-		line string
-		ok   bool
-	)
-	for {
-		if line, ok = scanner.Next(); ok {
-			f.insert(line)
-		} else {
-			break
-		}
+	for scanner.HasNext() {
+		f.insert(scanner.Next())
 	}
 	return f
 }

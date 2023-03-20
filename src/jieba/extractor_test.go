@@ -9,7 +9,7 @@ import (
 )
 
 func TestExtractor_Extract(t *testing.T) {
-	log.SetFlags(log.LstdFlags)
+	log.SetFlags(log.LstdFlags | log.Lshortfile)
 	e := GetExtractor()
 
 	f, err := os.Open("/home/chuns/code/haru/src/jieba/config/dict/test.txt")

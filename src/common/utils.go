@@ -1,5 +1,8 @@
 package common
 
+import "flag"
+
 func Init() {
-	InitOrm()
+	flag.StringVar(&JwtSecret, "jwt", "haru", "random secret")
+	//InitMysqlOrm()
 }
