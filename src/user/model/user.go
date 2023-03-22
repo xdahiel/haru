@@ -8,10 +8,11 @@ import (
 )
 
 type User struct {
-	ID          string    `json:"id" gorm:"primaryKey"`
-	Username    string    `json:"username"`
-	Password    string    `json:"password"`
-	CreatedTime time.Time `json:"created_time"`
+	ID        string `json:"id" gorm:"primaryKey;column:id;type:varchar(255)"`
+	Username  string `json:"username" gorm:"column:username;type:varchar(30)"`
+	Password  string `json:"password" gorm:"column:password;type:varchar(255)"`
+	CreatedAt int64  `json:"created_at" gorm:"column:created_at"`
+	UpdatedAt int64  `json:"updated_at" gorm:"column:updated_at;autoUpdateTime"`
 }
 
 func InitUser() {
@@ -25,9 +26,9 @@ func InitUser() {
 func Add(username, password string) error {
 	db := common.GetMysqlDB()
 	return db.Model(&User{}).Create(User{
-		ID:          uuid.NewString(),
-		Username:    username,
-		Password:    password,
-		CreatedTime: time.Now(),
+		ID:        uuid.NewString(),
+		Username:  username,
+		Password:  password,
+		CreatedAt: time.Now().Unix(),
 	}).Error
 }

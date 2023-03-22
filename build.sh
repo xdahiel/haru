@@ -18,6 +18,8 @@ function rand() {
   go build -o haru .
   # shellcheck disable=SC2103
   cd ..
-  ./src/haru -jwt=$res
-  return $res
+  mv ./src/haru .
+  ./haru -jwt=$res
 }
+
+rand

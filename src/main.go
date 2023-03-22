@@ -2,13 +2,16 @@ package main
 
 import (
 	"flag"
-	"fmt"
+	"github.com/gin-gonic/gin"
 	"haru/common"
+	"haru/middlewares"
 )
 
 func main() {
 	common.Init()
 	//user.Init()
 	flag.Parse()
-	fmt.Println(common.JwtSecret)
+
+	r := gin.New()
+	r.Use(middlewares.Middlewares()...)
 }
