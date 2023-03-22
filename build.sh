@@ -12,11 +12,12 @@ function rand() {
     res=$res${dict:num:1}
   done
 
+  # shellcheck disable=SC2164
   cd ./src
   go mod tidy
   go build -o haru .
+  # shellcheck disable=SC2103
   cd ..
   ./src/haru -jwt=$res
+  return $res
 }
-
-rand
