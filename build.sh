@@ -17,8 +17,6 @@ function rand() {
   go mod tidy
   go build -o haru .
   # shellcheck disable=SC2103
-  cd ..
-  mv ./src/haru .
   ./haru -jwt=$res
 }
 
