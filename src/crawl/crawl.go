@@ -3,6 +3,8 @@ package crawl
 import (
 	"github.com/robfig/cron/v3"
 	"haru/common/fileReader"
+	"haru/crawl/weibo"
+	"haru/engine/engine"
 )
 
 var c cron.Cron
@@ -21,4 +23,8 @@ func crawl() {
 
 func handle(url string) {
 
+}
+
+func IndexToEngine(search *engine.Engine) {
+	weibo.IndexWeibo(search)
 }

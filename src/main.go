@@ -4,10 +4,14 @@ import (
 	"flag"
 	"github.com/gin-gonic/gin"
 	"haru/common"
+	"haru/crawl"
+	"haru/engine"
 	"haru/logs"
 	"haru/user"
 	"log"
 	"net/http"
+	"os"
+	"os/signal"
 )
 
 func main() {
@@ -17,10 +21,25 @@ func main() {
 	user.Init()
 	flag.Parse()
 
+	e := engine.GetEngine()
+	go crawl.IndexToEngine(e)
+
+	// 捕获ctrl-c
+	c := make(chan os.Signal, 1)
+	signal.Notify(c, os.Interrupt)
+	go func() {
+		for range c {
+			log.Print("捕获Ctrl-c，退出服务器")
+			e.Close()
+			os.Exit(0)
+		}
+	}()
+
 	r := gin.New()
 	v1 := r.Group("/api/v1")
 
 	user.InitRouter(v1)
+	engine.InitRouter(v1)
 
 	//r.Use(middlewares.Middlewares()...)
 
