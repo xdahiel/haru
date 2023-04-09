@@ -24,7 +24,7 @@ func (r *RSet) clear() {
 }
 
 type SegmentBase interface {
-	Cut(sentence Rune) []Rune
+	Cut(sentence Rune) []segmentResp
 }
 
 type segmentBase struct {

@@ -21,15 +21,15 @@ func newSplitter(dictPath, hmmPath, userDictPath, stopWordPath string) *Segmente
 	}
 }
 
-func (s *Segmenter) Cut(sentence string) []string {
+func (s *Segmenter) Cut(sentence string) []types.SegmentResp {
 	cutRes := s.querySeg.Cut(types.Rune(sentence), true)
-	res := make([]string, 0)
+	res := make([]types.SegmentResp, 0)
 
 	for _, v := range cutRes {
-		if s.filter.Has(string(v)) {
+		if s.filter.Has(v.Text) {
 			continue
 		}
-		res = append(res, string(v))
+		res = append(res, v)
 	}
 	return res
 }

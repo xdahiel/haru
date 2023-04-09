@@ -1,6 +1,7 @@
 package types
 
 import (
+	"fmt"
 	"haru/jieba/config"
 	"testing"
 )
@@ -12,7 +13,8 @@ func TestQuerySegment_Cut(t *testing.T) {
 	res := q.Cut(Rune("我在北京大学读手扶拖拉机专业"), true)
 	get := ""
 	for _, v := range res {
-		get += string(v) + "\\"
+		get += v.Text + "\\"
+		fmt.Println(v.Text, v.Start)
 	}
 	if except != get {
 		t.Errorf("except: %v \nget: %v", except, get)
@@ -22,7 +24,7 @@ func TestQuerySegment_Cut(t *testing.T) {
 	res = q.Cut(Rune("小明硕士毕业于中国科学院计算所，后在日本京都大学深造"), true)
 	get = ""
 	for _, v := range res {
-		get += string(v) + "\\"
+		get += v.Text + "\\"
 	}
 	if except != get {
 		t.Errorf("except: %v \nget: %v", except, get)

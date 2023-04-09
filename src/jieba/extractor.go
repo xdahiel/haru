@@ -85,10 +85,10 @@ func (e *Extractor) extract(sentence types.Rune, topN int) []string {
 
 	for _, v := range cutRes {
 		t := uint(offset)
-		offset += len(v)
+		offset += len(v.Text)
 
-		sv := string(v)
-		if (len(v) == 1 && len(string(v)) == 3) || e.stopWords.has(sv) {
+		sv := string(v.Text)
+		if (len(v.Text) == 1 && len(string(v.Text)) == 3) || e.stopWords.has(sv) {
 			continue
 		}
 		if _, ok := wordMap[sv]; !ok {

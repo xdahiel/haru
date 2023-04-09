@@ -15,7 +15,7 @@ func TestTrieSegment_Cut(t *testing.T) {
 	res := ts.Cut(Rune("我在北京大学读手扶拖拉机专业"))
 	get := ""
 	for _, v := range res {
-		get += string(v) + "\\"
+		get += string(v.Text) + "\\"
 	}
 	if except != get {
 		t.Errorf("except: %v\nget: %v", except, get)
@@ -25,7 +25,7 @@ func TestTrieSegment_Cut(t *testing.T) {
 	res = ts.Cut(Rune("我是一个大学生，我有光明的前途"))
 	get = ""
 	for _, v := range res {
-		get += string(v) + "\\"
+		get += string(v.Text) + "\\"
 	}
 	if except != get {
 		t.Errorf("except: %v\nget: %v", except, get)

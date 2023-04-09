@@ -15,7 +15,7 @@ require (
 )
 
 require (
-	github.com/bytedance/sonic v1.8.5 // indirect
+	github.com/bytedance/sonic v1.8.7 // indirect
 	github.com/cespare/xxhash/v2 v2.2.0 // indirect
 	github.com/chenzhuoyu/base64x v0.0.0-20221115062448-fe3a3abad311 // indirect
 	github.com/cznic/fileutil v0.0.0-20181122101858-4d67cfea8c87 // indirect

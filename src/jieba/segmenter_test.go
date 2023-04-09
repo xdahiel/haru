@@ -10,7 +10,7 @@ func TestSplitter_Cut(t *testing.T) {
 	res := s.Cut("小明硕士毕业于中国科学院计算所，后在日本京都大学深造")
 	get := ""
 	for _, v := range res {
-		get += v + "\\"
+		get += v.Text + "\\"
 	}
 	if except != get {
 		t.Errorf("except: %v \nget: %v", except, get)

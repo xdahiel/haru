@@ -22,20 +22,29 @@ func newTrieSegmentReady(dictTrie *DictTrie) trieSegment {
 	}
 }
 
-func (ts *trieSegment) Cut(sentence Rune) []Rune {
+func (ts *trieSegment) Cut(sentence Rune) []segmentResp {
 	return ts.cut(sentence, maxWordLength)
 }
 
-func (ts *trieSegment) cut(sentence Rune, length int) []Rune {
+func (ts *trieSegment) cut(sentence Rune, length int) []segmentResp {
 	f := NewPreFilter(sentence, ts.symbols)
-	res := make([]Rune, 0)
+	res := make([]segmentResp, 0)
 
 	var l, r int
 	for f.HasNext() {
 		l, r = f.Next()
 		dags := ts.dictTrie.findAsDagWithMaxWordLength(sentence[l:r], length)
 		ts.calcDP(dags)
-		res = append(res, ts.cutByDag(sentence[l:r], dags)...)
+
+		offset := 0
+		cutRes := ts.cutByDag(sentence[l:r], dags)
+		for _, cut := range cutRes {
+			res = append(res, segmentResp{
+				Text:  cut,
+				Start: l + offset,
+			})
+			offset += len(cut)
+		}
 	}
 
 	return res

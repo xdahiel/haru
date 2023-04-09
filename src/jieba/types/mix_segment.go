@@ -27,9 +27,9 @@ func NewMixSegmentReady(trie *DictTrie, model *HmmModel) MixSegment {
 	}
 }
 
-func (x *MixSegment) Cut(sentence Rune) []Rune {
+func (x *MixSegment) Cut(sentence Rune) []segmentResp {
 	f := NewPreFilter(sentence, x.symbols)
-	res := make([]Rune, 0)
+	res := make([]segmentResp, 0)
 	for f.HasNext() {
 		l, r := f.Next()
 		res = append(res, x.cut(sentence[l:r], true)...)
@@ -37,7 +37,7 @@ func (x *MixSegment) Cut(sentence Rune) []Rune {
 	return res
 }
 
-func (x *MixSegment) cut(sentence Rune, hmm bool) []Rune {
+func (x *MixSegment) cut(sentence Rune, hmm bool) []segmentResp {
 	if !hmm {
 		return x.trieSeg.cut(sentence, maxWordLength)
 	}
@@ -46,15 +46,15 @@ func (x *MixSegment) cut(sentence Rune, hmm bool) []Rune {
 		panic(sentence)
 	}
 	words := x.trieSeg.cut(sentence, maxWordLength)
-	res := make([]Rune, 0)
+	res := make([]segmentResp, 0)
 	for i, v := range words {
-		if len(v) > 0 || (len(v) == 1 && !x.trieSeg.isUserDictSingleChineseWord(v[0])) {
+		if len(v.Text) > 0 || (len(v.Text) == 1 && !x.trieSeg.isUserDictSingleChineseWord(v.Text[0])) {
 			res = append(res, v)
 			continue
 		}
 
 		j := i
-		for j < len(v) && (len(words[j]) == 1) && !x.trieSeg.isUserDictSingleChineseWord(words[j][0]) {
+		for j < len(v.Text) && (len(words[j].Text) == 1) && !x.trieSeg.isUserDictSingleChineseWord(words[j].Text[0]) {
 			j++
 		}
 
@@ -62,14 +62,21 @@ func (x *MixSegment) cut(sentence Rune, hmm bool) []Rune {
 			panic(j)
 		}
 
-		// optimization need
+		// TODO: 待优化
 		tmp := make(Rune, 0)
-		for _, v := range words[i : j-1] {
-			tmp = append(tmp, v...)
+		for _, v1 := range words[i : j-1] {
+			tmp = append(tmp, v1.Text...)
 		}
-		tmp = append(tmp, words[j-1][:2]...)
+		tmp = append(tmp, words[j-1].Text[:2]...)
 		hmmRes := x.hmmSeg.cut(tmp)
-		res = append(res, hmmRes...)
+		offset := 0
+		for _, v1 := range hmmRes {
+			res = append(res, segmentResp{
+				Text:  v1,
+				Start: v.Start + offset,
+			})
+			offset += len(v1)
+		}
 		i = j - 1
 	}
 	return res

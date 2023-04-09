@@ -151,7 +151,7 @@ func (indexer *Indexer) AddDocumentToCache(document *types.DocumentIndex, forceU
 	}
 }
 
-// 向反向索引表中加入 ADDCACHE 中所有文档
+// AddDocuments 向反向索引表中加入 ADDCACHE 中所有文档
 func (indexer *Indexer) AddDocuments(documents *types.DocumentsIndex) {
 	if !indexer.initialized {
 		log.Fatal("索引器尚未初始化")
@@ -223,7 +223,7 @@ func (indexer *Indexer) AddDocuments(documents *types.DocumentsIndex) {
 	}
 }
 
-// 向 REMOVECACHE 中加入一个待删除文档
+// RemoveDocumentToCache 向 REMOVECACHE 中加入一个待删除文档
 // 返回值表示文档是否在索引表中被删除
 func (indexer *Indexer) RemoveDocumentToCache(docId uint64, forceUpdate bool) bool {
 	if !indexer.initialized {
@@ -261,7 +261,7 @@ func (indexer *Indexer) RemoveDocumentToCache(docId uint64, forceUpdate bool) bo
 	return false
 }
 
-// 向反向索引表中删除 REMOVECACHE 中所有文档
+// RemoveDocuments 向反向索引表中删除 REMOVECACHE 中所有文档
 func (indexer *Indexer) RemoveDocuments(documents *types.DocumentsId) {
 	if !indexer.initialized {
 		log.Fatal("索引器尚未初始化")
@@ -320,7 +320,7 @@ func (indexer *Indexer) RemoveDocuments(documents *types.DocumentsId) {
 	}
 }
 
-// 查找包含全部搜索键(AND操作)的文档
+// Lookup 查找包含全部搜索键(AND操作)的文档
 // 当docIds不为nil时仅从docIds指定的文档中查找
 func (indexer *Indexer) Lookup(
 	tokens []string, labels []string, docIds map[uint64]bool, countDocsOnly bool) (docs []types.IndexedDocument, numDocs int) {

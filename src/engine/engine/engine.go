@@ -2,6 +2,7 @@ package engine
 
 import (
 	"fmt"
+	"haru/logs"
 	"log"
 	"os"
 	"runtime"
@@ -253,7 +254,8 @@ func (engine *Engine) IndexDocument(docId uint64, data types.DocumentIndexData, 
 func (engine *Engine) internalIndexDocument(
 	docId uint64, data types.DocumentIndexData, forceUpdate bool) {
 	if !engine.initialized {
-		log.Fatal("必须先初始化引擎")
+		logs.Error("必须先初始化引擎")
+		os.Exit(1)
 	}
 
 	if docId != 0 {
@@ -280,7 +282,8 @@ func (engine *Engine) internalIndexDocument(
 //     如果立刻调用Search可能无法查询到这个文档。强制刷新索引请调用FlushIndex函数。
 func (engine *Engine) RemoveDocument(docId uint64, forceUpdate bool) {
 	if !engine.initialized {
-		log.Fatal("必须先初始化引擎")
+		logs.Error("必须先初始化引擎")
+		os.Exit(1)
 	}
 
 	if docId != 0 {
@@ -307,7 +310,8 @@ func (engine *Engine) RemoveDocument(docId uint64, forceUpdate bool) {
 // Search 查找满足搜索条件的文档，此函数线程安全
 func (engine *Engine) Search(request types.SearchRequest) (output types.SearchResponse) {
 	if !engine.initialized {
-		log.Fatal("必须先初始化引擎")
+		logs.Error("必须先初始化引擎")
+		os.Exit(1)
 	}
 
 	var rankOptions types.RankOptions
@@ -321,11 +325,11 @@ func (engine *Engine) Search(request types.SearchRequest) (output types.SearchRe
 	}
 
 	// 收集关键词
-	tokens := []string{}
+	var tokens []string
 	if request.Text != "" && engine.segmenter != nil {
-		querySegments := engine.segmenter.Cut(request.Text)
-		for _, s := range querySegments {
-			tokens = append(tokens, s)
+		cutRes := engine.segmenter.Cut(request.Text)
+		for _, cut := range cutRes {
+			tokens = append(tokens, cut.Text)
 		}
 	} else {
 		tokens = append(tokens, request.Tokens...)
@@ -376,6 +380,7 @@ func (engine *Engine) Search(request types.SearchRequest) (output types.SearchRe
 				}
 				numDocs += rankerOutput.numDocs
 			case <-time.After(time.Until(deadline)):
+				logs.Error("timeout...")
 				isTimeout = true
 			}
 		}
@@ -414,7 +419,7 @@ func (engine *Engine) Search(request types.SearchRequest) (output types.SearchRe
 	return
 }
 
-// 阻塞等待直到所有索引添加完毕
+// FlushIndex 阻塞等待直到所有索引添加完毕
 func (engine *Engine) FlushIndex() {
 	for {
 		runtime.Gosched()

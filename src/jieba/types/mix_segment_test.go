@@ -12,7 +12,7 @@ func TestMixSegment_Cut(t *testing.T) {
 	res := x.Cut(Rune("我在北京大学读手扶拖拉机专业"))
 	get := ""
 	for _, v := range res {
-		get += string(v) + "\\"
+		get += string(v.Text) + "\\"
 	}
 	if except != get {
 		t.Errorf("except: %v \n get: %v", except, get)

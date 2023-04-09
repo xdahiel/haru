@@ -13,7 +13,7 @@ func (p *posTagger) Tag(src Rune, st SegmentTagged) [][2]Rune {
 	res := make([][2]Rune, len(cutRes))
 
 	for _, v := range cutRes {
-		res = append(res, [2]Rune{v})
+		res = append(res, [2]Rune{v.Text})
 	}
 
 	return res

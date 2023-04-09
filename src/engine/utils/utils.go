@@ -1,5 +1,7 @@
 package utils
 
+import "github.com/bytedance/sonic"
+
 func AbsInt(a int) int {
 	if a < 0 {
 		return -a
@@ -12,4 +14,9 @@ func MinInt(a, b int) int {
 		return a
 	}
 	return b
+}
+
+func FormatOutput(v any) string {
+	data, _ := sonic.MarshalString(v)
+	return data
 }

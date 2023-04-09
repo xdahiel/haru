@@ -20,9 +20,9 @@ func newQuerySegmentReady(trie *DictTrie, model *HmmModel) QuerySegment {
 	}
 }
 
-func (q *QuerySegment) Cut(sentence Rune, hmm bool) []Rune {
+func (q *QuerySegment) Cut(sentence Rune, hmm bool) []SegmentResp {
 	f := NewPreFilter(sentence, q.mixSeg.symbols)
-	res := make([]Rune, 0)
+	res := make([]SegmentResp, 0)
 	for f.HasNext() {
 		l, r := f.Next()
 		res = append(res, q.cut(sentence[l:r], hmm)...)
@@ -30,26 +30,35 @@ func (q *QuerySegment) Cut(sentence Rune, hmm bool) []Rune {
 	return res
 }
 
-func (q *QuerySegment) cut(sentence Rune, hmm bool) []Rune {
+func (q *QuerySegment) cut(sentence Rune, hmm bool) []SegmentResp {
 	mixRes := q.mixSeg.cut(sentence, hmm)
 
-	res := make([]Rune, 0)
+	res := make([]SegmentResp, 0)
 	for _, v := range mixRes {
-		if len(v) > 2 {
-			for j := 0; j+1 < len(v); j++ {
-				if q.trie.findWord(v[j:j+2]) != nil {
-					res = append(res, v[j:j+2])
+		if len(v.Text) > 2 {
+			for j := 0; j+1 < len(v.Text); j++ {
+				if q.trie.findWord(v.Text[j:j+2]) != nil {
+					res = append(res, SegmentResp{
+						Text:  string(v.Text[j : j+2]),
+						Start: v.Start + j,
+					})
 				}
 			}
 		}
-		if len(v) > 3 {
-			for j := 0; j+2 < len(v); j++ {
-				if q.trie.findWord(v[j:j+3]) != nil {
-					res = append(res, v[j:j+3])
+		if len(v.Text) > 3 {
+			for j := 0; j+2 < len(v.Text); j++ {
+				if q.trie.findWord(v.Text[j:j+3]) != nil {
+					res = append(res, SegmentResp{
+						Text:  string(v.Text[j : j+3]),
+						Start: v.Start + j,
+					})
 				}
 			}
 		}
-		res = append(res, v)
+		res = append(res, SegmentResp{
+			Text:  string(v.Text),
+			Start: v.Start,
+		})
 	}
 	return res
 }
