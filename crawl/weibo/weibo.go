@@ -18,7 +18,7 @@ const (
 )
 
 var (
-	weiboData = "/home/haru/Projects/haru/src/crawl/data/weibo_data.txt"
+	weiboData = "./crawl/weibo/weibo_data.txt"
 	Wbs       = map[uint64]Weibo{}
 )
 

@@ -1,78 +1,20 @@
 <!doctype html>
 <html lang="en" class="h-100">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <meta name="description" content="">
-    <meta name="author" content="Mark Otto, Jacob Thornton, and Bootstrap contributors">
-    <meta name="generator" content="Hugo 0.108.0">
-    <title>春の</title>
+    <head>
+        <meta charset="utf-8">
+        <title>春の</title>
 
-    <link rel="shortcut icon" href="/static/assets/brand/icon.svg">
+        <link rel="shortcut icon" href="/static/assets/brand/icon.svg">
 
-<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
-
-    <style>
-      .bd-placeholder-img {
-        font-size: 1.125rem;
-        text-anchor: middle;
-        -webkit-user-select: none;
-        -moz-user-select: none;
-        user-select: none;
-      }
-
-      @media (min-width: 768px) {
-        .bd-placeholder-img-lg {
-          font-size: 3.5rem;
-        }
-      }
-
-      .b-example-divider {
-        height: 3rem;
-        background-color: rgba(0, 0, 0, .1);
-        border: solid rgba(0, 0, 0, .15);
-        border-width: 1px 0;
-        box-shadow: inset 0 .5em 1.5em rgba(0, 0, 0, .1), inset 0 .125em .5em rgba(0, 0, 0, .15);
-      }
-
-      .b-example-vr {
-        flex-shrink: 0;
-        width: 1.5rem;
-        height: 100vh;
-      }
-
-      .bi {
-        vertical-align: -.125em;
-        fill: currentColor;
-      }
-
-      .nav-scroller {
-        position: relative;
-        z-index: 2;
-        height: 2.75rem;
-        overflow-y: hidden;
-      }
-
-      .nav-scroller .nav {
-        display: flex;
-        flex-wrap: nowrap;
-        padding-bottom: 1rem;
-        margin-top: -1px;
-        overflow-x: auto;
-        text-align: center;
-        white-space: nowrap;
-        -webkit-overflow-scrolling: touch;
-      }
-    </style>
-
-    
-    <!-- Custom styles for this template -->
-    <link href="/static/index.css" rel="stylesheet">
-  </head>
-  <body class="d-flex h-100 text-center text-bg-dark">
-    
+        <link href="/static/assets/dist/css/bootstrap.min.css" rel="stylesheet">
+        <script lang="javascript" src="/static/assets/dist/js/jquery-3.6.4.min.js"></script>
+        <script lang="javascript" src="/static/assets/dist/js/bootstrap.bundle.min.js"></script>
+        <!-- Custom styles for this template -->
+        <link href="/static/index.css" rel="stylesheet">
+    </head>
+<body class="d-flex h-100 text-center text-bg-dark">
 <div class="cover-container d-flex w-100 h-100 p-3 mx-auto flex-column">
-  <header class="mb-auto">
+    <header class="mb-auto">
     <div>
       <h3 class="float-md-start mb-0">春の</h3>
       <nav class="nav nav-masthead justify-content-center float-md-end">
@@ -81,24 +23,92 @@
         <a class="nav-link fw-bold py-1 px-0" href="login.html">登录</a>
       </nav>
     </div>
-  </header>
+    </header>
 
-  <main class="px-3">
-    <div class="searchbar" style="background-color: white;">
-      <img src=/static/assets/images/icon_search.svg class="mg">
-      <input type="text" id="search" value="在春の中搜索......"
-             onfocus="if(value==='在春の中搜索......')value=''"
-             onblur="if(!value)value='在春の中搜索......'"
-             name="keyword" >
-      <img src=/static/assets/images/icon_pic.svg class="mcp">
-    </div>
-  </main>
+    <main class="px-3">
+        <div class="searchbar" style="background-color: white;">
+            <img src=/static/assets/images/icon_search.svg class="mg">
+            <input type="text" id="search" value="在春の中搜索......"
+                 onfocus="if(value==='在春の中搜索......')value=''"
+                 onblur="if(!value)value='在春の中搜索......'"
+                 name="keyword" >
+            <img id="image" src=/static/assets/images/icon_pic.svg class="mcp">
+        </div>
+        <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
+          <div class="modal-dialog" role="document">
+              <div class="modal-content">
+                  <div class="modal-header">
+                      <h5 class="modal-title" id="uploadModalLabel" style="color: black">选择你要搜索的图片</h5>
+                      <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                          <span aria-hidden="true">&times;</span>
+                      </button>
+                  </div>
+                  <div class="modal-body">
+                      <form id="uploadForm">
+                          <div class="form-group">
+                              <label for="fileInput" style="color: black">选择文件</label>
+                              <input type="file" class="form-control-file" id="fileInput">
+                          </div>
+                      </form>
+                  </div>
+                  <div class="modal-footer">
+                      <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                      <button type="button" class="btn btn-primary" id="uploadButton">上传</button>
+                  </div>
+              </div>
+          </div>
+        </div>
+    </main>
 
   <footer class="mt-auto text-white-50">
     <p>春の搜索引擎，由<a href="https://github.com/xdahiel">xdahiel</a>开发</p>
   </footer>
 </div>
 
+  <script>
+    var input = document.getElementById('search');
+
+    input.addEventListener("keypress", function (event) {
+      if (event.key === "Enter") {
+        event.preventDefault();
+        var val = document.getElementById('search').value;
+        console.log(val)
+        window.location.replace("http://localhost:8080/result.html?query=" + val)
+      }
+    })
+
+    $(document).ready(function() {
+      // 捕获元素的单击事件
+      $('#image').click(function() {
+        // 打开模态框
+        $('#uploadModal').modal('show');
+      });
+
+      // 捕获表单提交事件
+      $('#uploadButton').click(function() {
+        // 创建FormData对象
+        var formData = new FormData();
+        // 将文件添加到FormData对象中
+        formData.append('file', $('#fileInput')[0].files[0]);
+        // 发送文件上传请求
+        $.ajax({
+          url: 'upload.php',
+          type: 'POST',
+          data: formData,
+          contentType: false,
+          processData: false,
+          success: function (response) {
+            // 成功上传后重定向到新页面
+            window.location.href = 'newpage.html';
+          },
+          error: function (jqXHR, textStatus, errorThrown) {
+            // 处理错误情况
+            console.log(textStatus + ': ' + errorThrown);
+          }
+        });
+      });});
+
+  </script>
     
   </body>
 </html>
