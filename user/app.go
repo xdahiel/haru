@@ -14,5 +14,13 @@ func InitRouter(v1 *gin.RouterGroup) {
 	v1.Group("user")
 	{
 		v1.POST("/register", controller.Register)
+		v1.POST("/login", controller.Login)
+	}
+}
+
+func InitUserRouter(v1 *gin.RouterGroup) {
+	v1.Group("user")
+	{
+		v1.POST("/upload", controller.Upload)
 	}
 }

@@ -2,15 +2,17 @@ package controller
 
 import (
 	"github.com/gin-gonic/gin"
+	"haru/common"
 	"haru/logs"
 	"haru/user/model"
-	"log"
 	"net/http"
 )
 
 type RegisterRequest struct {
 	Username string `json:"username" form:"username"`
 	Password string `json:"password" form:"password"`
+	Email    string `json:"email" form:"email"`
+	Phone    string `json:"phone" form:"phone"`
 }
 
 func Register(c *gin.Context) {
@@ -20,7 +22,7 @@ func Register(c *gin.Context) {
 			"code": "2001",
 			"msg":  "无法解析参数!",
 		})
-		log.Printf("register error: %v", err)
+		logs.Info("failed resolve parameter: %v", err)
 		return
 	}
 	logs.Info("username: %v, password: %v", rr.Username, rr.Password)
@@ -53,7 +55,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	if u != nil {
+	if u != nil && len(u) > 0 {
 		c.JSON(http.StatusOK, gin.H{
 			"code": "2004",
 			"msg":  "用户已存在",
@@ -62,7 +64,13 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	err = model.AddUser(rr.Username, rr.Password)
+	err = model.AddUser(&model.User{
+		ID:       0,
+		Username: rr.Username,
+		Email:    rr.Email,
+		Phone:    rr.Phone,
+		Password: common.MD5(rr.Password),
+	})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": "2003",
@@ -71,4 +79,9 @@ func Register(c *gin.Context) {
 		logs.Error("add user error: %v", err)
 		return
 	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": "2000",
+		"msg":  "",
+	})
 }

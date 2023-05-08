@@ -20,11 +20,6 @@ func GetEngine() *engine.Engine {
 			IndexerInitOptions: &types.IndexerInitOptions{
 				IndexType: types.LocationsIndex,
 			},
-			// 如果你希望使用持久存储，启用下面的选项
-			// 默认使用boltdb持久化，如果你希望修改数据库类型
-			// 请修改 WUKONG_STORAGE_ENGINE 环境变量
-			// UsePersistentStorage: true,
-			// PersistentStorageFolder: "weibo_search",
 		})
 	})
 

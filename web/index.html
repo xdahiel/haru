@@ -9,6 +9,7 @@
         <link href="/static/assets/dist/css/bootstrap.min.css" rel="stylesheet">
         <script lang="javascript" src="/static/assets/dist/js/jquery-3.6.4.min.js"></script>
         <script lang="javascript" src="/static/assets/dist/js/bootstrap.bundle.min.js"></script>
+        <script src="/static/assets/dist/js/axios.min.js"></script>
         <!-- Custom styles for this template -->
         <link href="/static/index.css" rel="stylesheet">
     </head>
@@ -17,7 +18,7 @@
     <header class="mb-auto">
     <div>
       <h3 class="float-md-start mb-0">春の</h3>
-      <nav class="nav nav-masthead justify-content-center float-md-end">
+      <nav class="nav nav-masthead justify-content-center float-md-end" id="isLogged">
         <a class="nav-link fw-bold py-1 px-0 active" aria-current="page" href="#">主页</a>
         <a class="nav-link fw-bold py-1 px-0" href="register.html">注册</a>
         <a class="nav-link fw-bold py-1 px-0" href="login.html">登录</a>
@@ -34,6 +35,7 @@
                  name="keyword" >
             <img id="image" src=/static/assets/images/icon_pic.svg class="mcp">
         </div>
+        <div id="asso" style="margin-left: 30px"></div>
         <div class="modal fade" id="uploadModal" tabindex="-1" role="dialog" aria-labelledby="uploadModalLabel" aria-hidden="true">
           <div class="modal-dialog" role="document">
               <div class="modal-content">
@@ -65,50 +67,127 @@
   </footer>
 </div>
 
-  <script>
-    var input = document.getElementById('search');
+    <script>
+        let input = document.getElementById('search');
 
-    input.addEventListener("keypress", function (event) {
-      if (event.key === "Enter") {
-        event.preventDefault();
-        var val = document.getElementById('search').value;
-        console.log(val)
-        window.location.replace("http://localhost:8080/result.html?query=" + val)
-      }
-    })
+        input.addEventListener("keypress", function (event) {
+        if (event.key === "Enter") {
+            event.preventDefault();
+            let val = document.getElementById('search').value;
+            console.log(val)
+            window.location.replace("http://localhost:8080/result.html?query=" + val)
+        }
+        })
 
-    $(document).ready(function() {
-      // 捕获元素的单击事件
-      $('#image').click(function() {
-        // 打开模态框
-        $('#uploadModal').modal('show');
-      });
+        $(document).ready(function() {
+            // 捕获元素的单击事件
+            $('#image').click(function() {
+                // 打开模态框
+                $('#uploadModal').modal('show');
+            });
 
-      // 捕获表单提交事件
-      $('#uploadButton').click(function() {
-        // 创建FormData对象
-        var formData = new FormData();
-        // 将文件添加到FormData对象中
-        formData.append('file', $('#fileInput')[0].files[0]);
-        // 发送文件上传请求
-        $.ajax({
-          url: 'upload.php',
-          type: 'POST',
-          data: formData,
-          contentType: false,
-          processData: false,
-          success: function (response) {
-            // 成功上传后重定向到新页面
-            window.location.href = 'newpage.html';
-          },
-          error: function (jqXHR, textStatus, errorThrown) {
-            // 处理错误情况
-            console.log(textStatus + ': ' + errorThrown);
-          }
+            // 捕获表单提交事件
+            $('#uploadButton').click(function() {
+            // 创建FormData对象
+            var formData = new FormData();
+            // 将文件添加到FormData对象中
+            formData.append('file', $('#fileInput')[0].files[0]);
+            formData.append('username', getCookie('username'))
+            let jwtToken = getCookie('token');
+            console.log(jwtToken, document.cookie)
+            axios({
+                method: 'post',
+                url: 'http://localhost:8080/api/v2/upload',
+                data: formData,
+                headers: {
+                    'Content-Type': 'multipart/form-data',
+                    'Authorization': `Bearer ${jwtToken}`
+                }
+            }).then(response => {
+                if (response.data.code !== "2000") {
+                    alert('请登录后使用该功能！')
+                } else {
+                    console.log('开发中...')
+                }
+            })
+            .catch(error => {
+                console.error(error)
+            })
+            });
         });
-      });});
 
-  </script>
+        // 获取 cookie 值的函数
+        function getCookie(name) {
+            const cookies = document.cookie.split(';')
+            for (let i = 0; i < cookies.length; i++) {
+                const cookie = cookies[i].trim()
+                if (cookie.startsWith(`${name}=`)) {
+                    return cookie.substring(name.length + 1)
+                }
+            }
+            return null
+        }
+    </script>
+
+<script>
+    let isLogged = false;
+
+    const cookies = document.cookie.split("; ");
+    for (let i = 0; i < cookies.length; i++) {
+        const cookie = cookies[i].split("=");
+        if (cookie[0] === "token") {
+            const token = decodeURIComponent(cookie[1]);
+            isLogged = true;
+            console.log(token);
+            break;
+        }
+    }
+    console.log(document.cookie)
+
+    let tmpDiv = document.getElementById('isLogged');
+    if (isLogged) {
+        let username = getCookie('username')
+        tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="login.html"> ' + username + '</a>' +
+            '<a class="nav-link fw-bold py-1 px-0" href="#" onclick="logout()">退出登录</a>';
+    } else {
+        tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="register.html">注册</a>'
+         + '<a class="nav-link fw-bold py-1 px-0" href="login.html">登录</a>';
+    }
+</script>
+<script>
+    let logout = function () {
+        document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+        location.reload()
+    }
+
+    const inputElement = document.getElementById("search");
+
+    inputElement.addEventListener("input", function() {
+        // 在这里编写要执行的逻辑
+        const query = inputElement.value;
+        fetch('/api/v1/seek?query=' + query)
+            .then(response => response.text())
+            .then(data => {
+                console.log(data)
+                const obj = JSON.parse(data)
+                let wanted = '<ul class="list-group rounded">'
+
+                if (obj.msg === null) {
+                } else {
+                    for (let i = 0; i < obj.msg.length; i++) {
+                        wanted += '<li class="list-group-item rounded" style="padding-top: 2px; width: 552px; border-radius: 2em; ">'
+                            + '<a href="http://localhost:8080/result.html?query=' + obj.msg[i] + '"' + '>'
+                            + obj.msg[i] + '</a>'
+                            '</li>';
+                    }
+                }
+                wanted += '</ul>'
+                console.log(wanted)
+                document.getElementById('asso').innerHTML = wanted
+            })
+            .catch(error => console.error(error));
+    });
+</script>
     
   </body>
 </html>

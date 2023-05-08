@@ -2,7 +2,17 @@ package main
 
 import (
 	"flag"
+	"haru/middlewares"
+	"html/template"
+	"log"
+	"net/http"
+	"os"
+	"os/signal"
+
 	"github.com/gin-gonic/gin"
+
+	"haru/associate"
+	assoTypes "haru/associate/types"
 	"haru/common"
 	"haru/crawl"
 	"haru/crawl/weibo"
@@ -10,11 +20,6 @@ import (
 	"haru/engine/types"
 	"haru/logs"
 	"haru/user"
-	"html/template"
-	"log"
-	"net/http"
-	"os"
-	"os/signal"
 )
 
 func main() {
@@ -40,8 +45,14 @@ func main() {
 
 	r := gin.New()
 	v1 := r.Group("/api/v1")
+	v2 := r.Group("/api/v2")
+
+	v2.Use(middlewares.Middlewares()...)
 
 	user.InitRouter(v1)
+	user.InitUserRouter(v2)
+
+	associate.InitRouter(v1)
 
 	//r.Use(middlewares.Middlewares()...)
 
@@ -73,6 +84,7 @@ func render(r *gin.Engine) {
 	})
 	r.GET("/result.html", func(ctx *gin.Context) {
 		query := ctx.Query("query")
+		assoTypes.GetTrie().Insert(query)
 		logs.Debug("query: %v", query)
 		e := engine.GetEngine()
 		output := e.Search(types.SearchRequest{

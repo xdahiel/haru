@@ -6,39 +6,82 @@
     <meta name="generator" content="Hugo 0.108.0">
     <title>登录春の</title>
 
-    <link rel="shortcut icon" href="public/assets/brand/icon.svg">
+    <link rel="shortcut icon" href="/static/assets/brand/icon.svg">
 
-<link href="public/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+<link href="/static/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 
     
     <!-- Custom styles for this template -->
-    <link href="public/register.css" rel="stylesheet">
+    <link href="/static/register.css" rel="stylesheet">
   </head>
   <body class="text-center">
     
 <main class="form-signin w-100 m-auto">
-  <form>
-    <img class="mb-4" src="public/assets/brand/logo.svg" alt="" width="176" height="62">
+    <div id="done"></div>
+    <img class="mb-4" src="/static/assets/brand/logo.svg" alt="" width="176" height="62">
     <h1 class="h3 mb-3 fw-normal">欢迎登录</h1>
 
     <div class="form-floating">
-      <input type="email" class="form-control" id="floatingInput" placeholder="name@example.com">
-      <label for="floatingInput">用户名</label>
+        <input type="email" class="form-control" id="email" placeholder="name@example.com">
+        <label for="email">邮箱</label>
     </div>
     <div class="form-floating">
-      <input type="password" class="form-control" id="floatingPassword" placeholder="Password">
-      <label for="floatingPassword">密码</label>
+        <input type="password" class="form-control" id="password" placeholder="Password">
+        <label for="password">密码</label>
     </div>
 
-    <div class="checkbox mb-3">
-      <label>
-        <input type="checkbox" value="remember-me"> 记住我
-      </label>
-    </div>
-    <button class="w-100 btn btn-lg btn-primary" type="submit">登录</button>
+    <button class="w-100 btn btn-lg btn-primary" onclick="login()">登录</button>
     <p class="mt-5 mb-3 text-muted">&copy; 春の搜索引擎</p>
-  </form>
 </main>
-    
+
+
+  <script>
+      login = function () {
+          let email = document.getElementById('email').value;
+          let password = document.getElementById('password').value;
+          const url = "http://localhost:8080/api/v1/login";
+          const data = {
+              email: email,
+              password: password,
+          }
+          const params = {
+              method: "POST",
+              headers: {
+                  "Content-type": "application/json; charset=utf-8"
+              },
+              body: JSON.stringify(data)
+          };
+          fetch(url, params)
+              .then(response => response.text())
+              .then(data => {
+                  console.log(data)
+                  const obj = JSON.parse(data)
+                  if (obj.code !== "2000") {
+                      document.getElementById("done").innerHTML = '<div class="container mt-5">\n' +
+                          '        <div class="alert alert-danger" role="alert">\n' +
+                          obj.msg +
+                          '        </div>\n' +
+                          '    </div>';
+                  } else {
+                      console.log(obj.msg)
+                      let token = encodeURIComponent(obj.msg.token)
+                      let email1 = encodeURIComponent(email)
+                      let username = encodeURIComponent(obj.msg.username)
+                      document.cookie = "token=" + token + ';email=' + email1 + ';username=' + username + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; domain=localhost:8080; path=/";;
+                      console.log(document.cookie, email1, username)
+                      document.getElementById("done").innerHTML = '<div class="container mt-5">\n' +
+                          '        <div class="alert alert-success" role="alert">\n' +
+                          '            登录成功！正在跳转到首页，请稍等...\n' +
+                          '        </div>\n' +
+                          '    </div>';
+
+                      setTimeout(function() {
+                          window.location.href = "http://localhost:8080/";
+                      }, 200);
+                  }
+              })
+              .catch(error => console.log(error));
+      }
+  </script>
   </body>
 </html>

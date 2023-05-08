@@ -5,6 +5,7 @@ import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/gin-gonic/gin"
 	"haru/common"
+	"haru/logs"
 	"net/http"
 	"strings"
 	"time"
@@ -17,13 +18,13 @@ type HaruClaim struct {
 
 const TokenExpireDuration = time.Hour * 60
 
-func genToken(username string) (string, error) {
+func GenToken(str string) (string, error) {
 	if common.JwtSecret == "" {
 		return "", fmt.Errorf("no jwt secret spetified")
 	}
 
 	access := HaruClaim{
-		Username: username,
+		Username: str,
 		StandardClaims: jwt.StandardClaims{
 			ExpiresAt: time.Now().Add(TokenExpireDuration).Unix(),
 			Issuer:    "haru",
@@ -31,13 +32,13 @@ func genToken(username string) (string, error) {
 	}
 
 	token := jwt.NewWithClaims(jwt.SigningMethodHS256, access)
-	return token.SignedString(common.JwtSecret)
+	return token.SignedString([]byte(common.JwtSecret))
 }
 
 func parseToken(tokenString string) (*HaruClaim, error) {
 	token, err := jwt.ParseWithClaims(tokenString, new(HaruClaim),
 		func(token *jwt.Token) (interface{}, error) {
-			return common.JwtSecret, nil
+			return []byte(common.JwtSecret), nil
 		})
 
 	if err != nil {
@@ -64,6 +65,7 @@ func jwtAuth() func(c *gin.Context) {
 		}
 
 		parts := strings.SplitN(authHeader, " ", 2)
+		logs.Debug("auth header: %v", authHeader)
 		if !(len(parts) == 2 && parts[0] == "Bearer") {
 			c.JSON(http.StatusOK, gin.H{
 				"code": "2004",
