@@ -1,9 +1,7 @@
 package core
 
 import (
-	"haru/logs"
 	"log"
-	"os"
 	"sort"
 	"sync"
 
@@ -22,8 +20,7 @@ type Ranker struct {
 
 func (ranker *Ranker) Init() {
 	if ranker.initialized {
-		logs.Error("排序器已经初始化")
-		return
+		log.Fatal("排序器不能初始化两次")
 	}
 	ranker.initialized = true
 
@@ -31,11 +28,10 @@ func (ranker *Ranker) Init() {
 	ranker.lock.docs = make(map[uint64]bool)
 }
 
-// AddDoc 给某个文档添加评分字段
+// 给某个文档添加评分字段
 func (ranker *Ranker) AddDoc(docId uint64, fields interface{}) {
 	if !ranker.initialized {
-		logs.Error("排序器尚未初始化")
-		os.Exit(1)
+		log.Fatal("排序器尚未初始化")
 	}
 
 	ranker.lock.Lock()
@@ -44,11 +40,10 @@ func (ranker *Ranker) AddDoc(docId uint64, fields interface{}) {
 	ranker.lock.Unlock()
 }
 
-// RemoveDoc 删除某个文档的评分字段
+// 删除某个文档的评分字段
 func (ranker *Ranker) RemoveDoc(docId uint64) {
 	if !ranker.initialized {
-		logs.Error("排序器尚未初始化")
-		os.Exit(1)
+		log.Fatal("排序器尚未初始化")
 	}
 
 	ranker.lock.Lock()

@@ -28,10 +28,12 @@ func (engine *Engine) segmenterWorker() {
 		numTokens := 0
 		if !engine.initOptions.NotUsingSegmenter && request.data.Content != "" {
 			// 当文档正文不为空时，优先从内容分词中得到关键词
-			segments := engine.segmenter.Cut(request.data.Content)
+			segments := engine.segmenter.Segment([]byte(request.data.Content))
 			for _, segment := range segments {
-				token := segment.Text
-				tokensMap[token] = append(tokensMap[token], segment.Start)
+				token := segment.Token().Text()
+				if !engine.stopTokens.IsStopToken(token) {
+					tokensMap[token] = append(tokensMap[token], segment.Start())
+				}
 			}
 			numTokens = len(segments)
 		} else {

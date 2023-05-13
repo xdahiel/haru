@@ -8,6 +8,7 @@ import (
 
 func Init() {
 	model.InitUser()
+	model.InitAdvertise()
 }
 
 func InitRouter(v1 *gin.RouterGroup) {
@@ -22,5 +23,6 @@ func InitUserRouter(v1 *gin.RouterGroup) {
 	v1.Group("user")
 	{
 		v1.POST("/upload", controller.Upload)
+		v1.POST("/addAdv", controller.AddAdvertise)
 	}
 }

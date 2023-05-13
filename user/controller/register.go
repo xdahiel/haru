@@ -13,6 +13,7 @@ type RegisterRequest struct {
 	Password string `json:"password" form:"password"`
 	Email    string `json:"email" form:"email"`
 	Phone    string `json:"phone" form:"phone"`
+	Role     string `json:"role" form:"role"`
 }
 
 func Register(c *gin.Context) {
@@ -45,7 +46,7 @@ func Register(c *gin.Context) {
 		return
 	}
 
-	u, err := model.FindUser(rr.Username)
+	u, err := model.FindUserByEmail(rr.Username)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": "2003",
@@ -70,6 +71,7 @@ func Register(c *gin.Context) {
 		Email:    rr.Email,
 		Phone:    rr.Phone,
 		Password: common.MD5(rr.Password),
+		Role:     rr.Role,
 	})
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{

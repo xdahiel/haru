@@ -1,8 +1,9 @@
 package main
 
 import (
+	"context"
 	"flag"
-	"haru/middlewares"
+	"haru/user/model"
 	"html/template"
 	"log"
 	"net/http"
@@ -19,7 +20,9 @@ import (
 	"haru/engine"
 	"haru/engine/types"
 	"haru/logs"
+	"haru/middlewares"
 	"haru/user"
+	userController "haru/user/controller"
 )
 
 func main() {
@@ -60,8 +63,8 @@ func main() {
 		"formatDate": Timestamp2String,
 	})
 	r.Static("/static", "web/public")
-	r.LoadHTMLFiles("web/index.html", "web/login.html",
-		"web/register.html", "web/result.html", "web/user.html")
+	r.LoadHTMLFiles("web/index.html", "web/login.html", "web/company.html",
+		"web/register.html", "web/result.html", "web/user.html", "web/image_result.html")
 
 	render(r)
 
@@ -82,6 +85,7 @@ func render(r *gin.Engine) {
 	r.GET("/login.html", func(c *gin.Context) {
 		c.HTML(http.StatusOK, "login.html", gin.H{})
 	})
+	r.GET("/company.html", userController.Company)
 	r.GET("/result.html", func(ctx *gin.Context) {
 		query := ctx.Query("query")
 		assoTypes.GetTrie().Insert(query)
@@ -96,6 +100,18 @@ func render(r *gin.Engine) {
 			},
 		})
 
+		advs := make([]*model.Advertise, 0)
+		for _, token := range output.Tokens {
+			tmp, err := model.FindAdvertiseByKeyword(token)
+			if err != nil {
+				continue
+			}
+			advs = append(advs, tmp...)
+		}
+		if len(advs) > 10 {
+			advs = advs[:10]
+		}
+
 		// 整理为输出格式
 		var docs []weibo.Weibo
 		for _, doc := range output.Docs {
@@ -105,6 +121,37 @@ func render(r *gin.Engine) {
 		ctx.HTML(http.StatusOK, "result.html", gin.H{
 			"result": docs,
 			"query":  query,
+			"advs":   advs,
+		})
+	})
+
+	r.GET("/image_result.html", func(c *gin.Context) {
+		logs.Info("visit image_result.html")
+
+		rdb := common.GetRDB()
+		ctx := context.Background()
+
+		length, _ := rdb.LLen(ctx, "names").Result()
+
+		//images, _ := rdb.LRange(ctx, "images", 0, length-1).Result()
+		names, _ := rdb.LRange(ctx, "names", 0, length-1).Result()
+		logs.Debug("get from redis: %v", names)
+
+		//type Image struct {
+		//	Name string `json:"name"`
+		//	Data string `json:"data"`
+		//}
+
+		//var results []Image
+		//for i, image := range images {
+		//	results = append(results, Image{
+		//		Name: names[i],
+		//		Data: image,
+		//	})
+		//}
+
+		c.HTML(http.StatusOK, "image_result.html", gin.H{
+			"results": names,
 		})
 	})
 }

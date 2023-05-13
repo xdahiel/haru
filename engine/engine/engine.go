@@ -2,7 +2,6 @@ package engine
 
 import (
 	"fmt"
-	"haru/logs"
 	"log"
 	"os"
 	"runtime"
@@ -11,12 +10,12 @@ import (
 	"sync/atomic"
 	"time"
 
-	"haru/common/murmur"
+	"github.com/huichen/murmur"
+	"github.com/huichen/sego"
 	"haru/engine/core"
 	"haru/engine/storage"
 	"haru/engine/types"
 	"haru/engine/utils"
-	"haru/jieba"
 )
 
 const (
@@ -41,7 +40,7 @@ type Engine struct {
 
 	indexers                []*core.Indexer
 	rankers                 []*core.Ranker
-	segmenter               *jieba.Segmenter
+	segmenter               *sego.Segmenter
 	usingExternalSegmenter  bool
 	stopTokens              *types.StopTokens
 	usingExternalStopTokens bool
@@ -81,7 +80,9 @@ func (engine *Engine) Init(options types.EngineInitOptions) {
 			engine.segmenter = options.Segmenter
 			engine.usingExternalSegmenter = true
 		} else {
-			engine.segmenter = jieba.GetSplitter()
+			engine.segmenter = &sego.Segmenter{}
+			engine.segmenter.LoadDictionary(options.SegmenterDictionaries)
+			engine.usingExternalSegmenter = false
 		}
 
 		// 初始化停用词
@@ -89,6 +90,8 @@ func (engine *Engine) Init(options types.EngineInitOptions) {
 			engine.stopTokens = options.StopTokens
 			engine.usingExternalStopTokens = true
 		} else {
+			engine.stopTokens = &types.StopTokens{}
+			engine.stopTokens.Init(options.StopTokenFile)
 			engine.usingExternalStopTokens = false
 		}
 	}
@@ -254,8 +257,7 @@ func (engine *Engine) IndexDocument(docId uint64, data types.DocumentIndexData, 
 func (engine *Engine) internalIndexDocument(
 	docId uint64, data types.DocumentIndexData, forceUpdate bool) {
 	if !engine.initialized {
-		logs.Error("必须先初始化引擎")
-		os.Exit(1)
+		log.Fatal("必须先初始化引擎")
 	}
 
 	if docId != 0 {
@@ -282,8 +284,7 @@ func (engine *Engine) internalIndexDocument(
 //     如果立刻调用Search可能无法查询到这个文档。强制刷新索引请调用FlushIndex函数。
 func (engine *Engine) RemoveDocument(docId uint64, forceUpdate bool) {
 	if !engine.initialized {
-		logs.Error("必须先初始化引擎")
-		os.Exit(1)
+		log.Fatal("必须先初始化引擎")
 	}
 
 	if docId != 0 {
@@ -307,11 +308,10 @@ func (engine *Engine) RemoveDocument(docId uint64, forceUpdate bool) {
 	}
 }
 
-// Search 查找满足搜索条件的文档，此函数线程安全
+// 查找满足搜索条件的文档，此函数线程安全
 func (engine *Engine) Search(request types.SearchRequest) (output types.SearchResponse) {
 	if !engine.initialized {
-		logs.Error("必须先初始化引擎")
-		os.Exit(1)
+		log.Fatal("必须先初始化引擎")
 	}
 
 	var rankOptions types.RankOptions
@@ -325,11 +325,14 @@ func (engine *Engine) Search(request types.SearchRequest) (output types.SearchRe
 	}
 
 	// 收集关键词
-	var tokens []string
+	tokens := []string{}
 	if request.Text != "" && engine.segmenter != nil {
-		cutRes := engine.segmenter.Cut(request.Text)
-		for _, cut := range cutRes {
-			tokens = append(tokens, cut.Text)
+		querySegments := engine.segmenter.Segment([]byte(request.Text))
+		for _, s := range querySegments {
+			token := s.Token().Text()
+			if engine.stopTokens != nil && !engine.stopTokens.IsStopToken(token) {
+				tokens = append(tokens, s.Token().Text())
+			}
 		}
 	} else {
 		tokens = append(tokens, request.Tokens...)
@@ -380,7 +383,6 @@ func (engine *Engine) Search(request types.SearchRequest) (output types.SearchRe
 				}
 				numDocs += rankerOutput.numDocs
 			case <-time.After(time.Until(deadline)):
-				logs.Error("timeout...")
 				isTimeout = true
 			}
 		}
@@ -419,7 +421,7 @@ func (engine *Engine) Search(request types.SearchRequest) (output types.SearchRe
 	return
 }
 
-// FlushIndex 阻塞等待直到所有索引添加完毕
+// 阻塞等待直到所有索引添加完毕
 func (engine *Engine) FlushIndex() {
 	for {
 		runtime.Gosched()

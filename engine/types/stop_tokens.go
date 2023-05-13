@@ -35,7 +35,8 @@ func (st *StopTokens) Init(stopTokenFile string) {
 }
 
 func (st *StopTokens) IsStopToken(token string) bool {
-	return true
+	_, found := st.stopTokens[token]
+	return found
 }
 
 // 释放资源

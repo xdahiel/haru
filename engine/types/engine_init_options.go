@@ -1,9 +1,10 @@
 package types
 
 import (
-	"haru/jieba"
 	"log"
 	"runtime"
+
+	"github.com/huichen/sego"
 )
 
 var (
@@ -36,7 +37,7 @@ type EngineInitOptions struct {
 	NotUsingSegmenter bool
 
 	// 尝试使用外部传入的 segmenter，如果为 nil 则使用下面的字典文件
-	Segmenter *jieba.Segmenter
+	Segmenter *sego.Segmenter
 	// 半角逗号分隔的字典文件，具体用法见
 	// sego.Segmenter.LoadDictionary函数的注释
 	SegmenterDictionaries string

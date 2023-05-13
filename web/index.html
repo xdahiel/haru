@@ -56,6 +56,9 @@
                   <div class="modal-footer">
                       <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
                       <button type="button" class="btn btn-primary" id="uploadButton">上传</button>
+                      <div id="loadingSpinner" class="spinner-border text-primary" role="status">
+                          <span class="visually-hidden">加载中...</span>
+                      </div>
                   </div>
               </div>
           </div>
@@ -75,7 +78,7 @@
             event.preventDefault();
             let val = document.getElementById('search').value;
             console.log(val)
-            window.location.replace("http://localhost:8080/result.html?query=" + val)
+            window.location.href = "http://localhost:8080/result.html?query=" + val
         }
         })
 
@@ -86,33 +89,41 @@
                 $('#uploadModal').modal('show');
             });
 
+            var loadingSpinner = document.getElementById("loadingSpinner");
+            loadingSpinner.style.display = "none"
+
             // 捕获表单提交事件
             $('#uploadButton').click(function() {
-            // 创建FormData对象
-            var formData = new FormData();
-            // 将文件添加到FormData对象中
-            formData.append('file', $('#fileInput')[0].files[0]);
-            formData.append('username', getCookie('username'))
-            let jwtToken = getCookie('token');
-            console.log(jwtToken, document.cookie)
-            axios({
-                method: 'post',
-                url: 'http://localhost:8080/api/v2/upload',
-                data: formData,
-                headers: {
-                    'Content-Type': 'multipart/form-data',
-                    'Authorization': `Bearer ${jwtToken}`
-                }
-            }).then(response => {
-                if (response.data.code !== "2000") {
-                    alert('请登录后使用该功能！')
-                } else {
-                    console.log('开发中...')
-                }
-            })
-            .catch(error => {
-                console.error(error)
-            })
+                loadingSpinner.style.display = "inline-block";
+
+                // 创建FormData对象
+                var formData = new FormData();
+                let username = getCookie('username')
+                // 将文件添加到FormData对象中
+                formData.append('file', $('#fileInput')[0].files[0]);
+                formData.append('username', username)
+                let jwtToken = getCookie('token');
+                console.log(jwtToken, document.cookie)
+                axios({
+                    method: 'post',
+                    url: 'http://localhost:8080/api/v2/upload',
+                    data: formData,
+                    headers: {
+                        'Content-Type': 'multipart/form-data',
+                        'Authorization': `Bearer ${jwtToken}`
+                    }
+                }).then(response => {
+                    if (response.data.code !== "2000") {
+                        alert('请登录后使用该功能！')
+                    } else {
+                        window.location.href = "http://localhost:8080/image_result.html?user=" + username
+                    }
+                })
+                .catch(error => {
+                    console.error(error)
+                }).finally(function () {
+                    loadingSpinner.style.display = "none";
+                })
             });
         });
 
@@ -143,12 +154,23 @@
         }
     }
     console.log(document.cookie)
+    let role = getCookie('role')
 
     let tmpDiv = document.getElementById('isLogged');
     if (isLogged) {
         let username = getCookie('username')
-        tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="login.html"> ' + username + '</a>' +
-            '<a class="nav-link fw-bold py-1 px-0" href="#" onclick="logout()">退出登录</a>';
+        let role = username.substring(username.length - 3, username.length - 2)
+        let id = username.substring(username.length - 2, username.length)
+        username = username.substring(0, username.length - 3)
+        console.log(id, role)
+
+        if (role === '1') { // 商户
+            tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="company.html?id=' + id + '"> ' + username + '</a>' +
+                '<a class="nav-link fw-bold py-1 px-0" href="#" onclick="logout()">退出登录</a>';
+        } else {
+            tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="#"> ' + username + '</a>' +
+                '<a class="nav-link fw-bold py-1 px-0" href="#" onclick="logout()">退出登录</a>';
+        }
     } else {
         tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="register.html">注册</a>'
          + '<a class="nav-link fw-bold py-1 px-0" href="login.html">登录</a>';

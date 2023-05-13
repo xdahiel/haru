@@ -15,8 +15,8 @@ func GetEngine() *engine.Engine {
 	searchOnce.Do(func() {
 		search = engine.Engine{}
 		search.Init(types.EngineInitOptions{
-			SegmenterDictionaries: "../jieba/config/dict/jieba.dict.utf8",
-			StopTokenFile:         "../jieba/config/dict/stop_words.utf8",
+			SegmenterDictionaries: "jieba/config/dict/dictionary.txt",
+			StopTokenFile:         "jieba/config/dict/stop_words.utf8",
 			IndexerInitOptions: &types.IndexerInitOptions{
 				IndexType: types.LocationsIndex,
 			},

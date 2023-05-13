@@ -2,9 +2,11 @@ package controller
 
 import (
 	"bytes"
+	"context"
+	"encoding/base64"
+	"encoding/json"
 	"fmt"
-	"github.com/gin-gonic/gin"
-	"haru/logs"
+	"haru/common"
 	"io"
 	"io/ioutil"
 	"mime/multipart"
@@ -12,7 +14,15 @@ import (
 	"os"
 	"path/filepath"
 	"strings"
+
+	"github.com/gin-gonic/gin"
+
+	"haru/logs"
 )
+
+type ImageSearchResp struct {
+	Results []string `json:"results"`
+}
 
 func Upload(c *gin.Context) {
 	file, err := c.FormFile("file")
@@ -57,12 +67,55 @@ func Upload(c *gin.Context) {
 		return
 	}
 
-	getImageResults(username + ext)
+	res := getImageResults(username + ext)
+	//bss, err := transImage2String(res)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": "2003",
+			"msg":  "搜索失败！",
+		})
+		logs.Error("Failed transfer image to string: %v", err)
+		return
+	}
+
+	for i, _ := range res {
+		res[i] = "/static/" + strings.Replace(res[i], "\\", "/", -1)
+	}
+
+	rdb := common.GetRDB()
+	ctx := context.Background()
+
+	logs.Debug("insert into redis: %v", res)
+	//rdb.RPush(ctx, "images", bss)
+	rdb.LTrim(ctx, "names", 1, 0)
+	rdb.RPush(ctx, "names", res)
 
 	c.JSON(http.StatusOK, gin.H{
 		"code": "2000",
 		"msg":  "success",
 	})
+}
+
+func transImage2String(paths []string) ([]string, error) {
+	var res []string
+	pathPrefix := "D:\\PycharmProjects\\haru\\"
+	for _, path := range paths {
+		file, err := os.Open(pathPrefix + path)
+		if err != nil {
+			return nil, err
+		}
+		defer file.Close()
+
+		fileBytes, err := io.ReadAll(file)
+		if err != nil {
+			return nil, err
+		}
+
+		encodingString := base64.StdEncoding.EncodeToString(fileBytes)
+		res = append(res, encodingString)
+	}
+
+	return res, nil
 }
 
 func getImageResults(filename string) []string {
@@ -107,6 +160,27 @@ func getImageResults(filename string) []string {
 		fmt.Println(err)
 		return nil
 	}
-	fmt.Println(string(body))
-	return nil
+
+	logs.Info("resp: %v", string(body))
+	return resolveResp(string(body))
+}
+
+func resolveResp(jsonStr string) []string {
+
+	// 解析 JSON 字符串
+	var result map[string]interface{}
+	err := json.Unmarshal([]byte(jsonStr), &result)
+	if err != nil {
+		panic(err)
+	}
+
+	// 提取匹配结果
+	results := result["results"].([]interface{})
+	filenames := make([]string, len(results))
+	for i, v := range results {
+		filename := v.(string)
+		filenames[i] = filename
+	}
+
+	return filenames
 }

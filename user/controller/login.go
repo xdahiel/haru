@@ -1,6 +1,7 @@
 package controller
 
 import (
+	"fmt"
 	"github.com/gin-gonic/gin"
 	"golang.org/x/crypto/bcrypt"
 	"haru/logs"
@@ -25,7 +26,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	u, err := model.FindUser(lr.Email)
+	u, err := model.FindUserByEmail(lr.Email)
 	if err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": "2002",
@@ -44,7 +45,7 @@ func Login(c *gin.Context) {
 		return
 	}
 
-	if err := bcrypt.CompareHashAndPassword([]byte(u[0].Password), []byte(lr.Password)); err != nil {
+	if err = bcrypt.CompareHashAndPassword([]byte(u[0].Password), []byte(lr.Password)); err != nil {
 		c.JSON(http.StatusOK, gin.H{
 			"code": "2004",
 			"msg":  "密码错误！",
@@ -54,15 +55,16 @@ func Login(c *gin.Context) {
 	}
 
 	token, _ := middlewares.GenToken(lr.Email)
-	logs.Debug("token: %v, username: %v", token, u[0].Username)
+	logs.Debug("get user: %v", fmt.Sprintf("%#v", u[0]))
 	c.SetCookie("token", token, 3600*24, "/", "localhost", false, false)
-	c.SetCookie("username", u[0].Username, 3600*24, "/", "localhost", false, false)
+	c.SetCookie("username", u[0].Username+u[0].Role+fmt.Sprintf("%02d", u[0].ID), 3600*24, "/", "localhost", false, false)
 	c.SetCookie("email", u[0].Email, 3600*24, "/", "localhost", false, false)
+
 	c.JSON(http.StatusOK, gin.H{
 		"code": "2000",
 		"msg": gin.H{
-			"token":    token,
-			"username": u[0].Username,
+			"token": token,
+			"user":  u[0],
 		},
 	})
 	return

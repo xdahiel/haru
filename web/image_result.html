@@ -3,7 +3,7 @@
 <head>
 
     <meta charset="utf-8">
-    <title>{{.query}}的搜索结果</title>
+    <title>搜索结果</title>
 
     <link href="/static/assets/dist/css/bootstrap.min.css" rel="stylesheet">
 
@@ -26,7 +26,7 @@
                 <main class="px-3">
                     <div class="searchbar" style="background-color: white;">
                         <img src=/static/assets/images/icon_search.svg class="mg" style="margin-left: 10px">
-                        <input type="text" id="search" value={{.query}}
+                        <input type="text" id="search" value='在春の中搜索......'
                                onfocus="if(value==='在春の中搜索......')value=''"
                                onblur="if(!value)value='在春の中搜索......'"
                                name="keyword" >
@@ -34,31 +34,15 @@
                 </main>
             </div>
         </div>
-        <div class="container-fluid d-flex align-items-center">
-            <a href="http://localhost:8080" class="ms-auto link-light" hreflang="ar">回到主页</a>
-        </div>
     </nav>
-
 </header>
 
 <!-- Begin page content -->
 <main class="flex-shrink-0" >
     <div class="container">
         <h1>为您搜索到了以下结果...</h1><br>
-        {{range .advs}}
-        <div class="d-flex text-body-secondary pt-3">
-            <p class="pb-3 mb-0 small lh-sm border-bottom">
-                <strong class="d-block text-gray-dark">来自{{.Username}}的推广</strong>
-                {{.Handle}}<br>
-                <a href="{{.Link}}">{{.Link}}</a>
-            </p>
-        </div>
-        {{end}}
-        {{range .result}}
-        <p>
-            {{.Text}}<br>
-            ---------- {{.UserName}}
-        </p>
+        {{range $i, $value := .results}}
+        <img src={{$value}} alt="" style="height: auto" width="200px">
         {{end}}
     </div>
 </main>

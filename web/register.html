@@ -37,10 +37,24 @@
     </div>
   </div>
   <div class="form-floating">
-    <input type="number" class="form-control" id="phone" placeholder="Phone" required>
+    <input type="text" class="form-control" id="phone" placeholder="Phone" required>
     <label for="phone">手机号码</label>
     <div class="invalid-feedback">
       手机号码
+    </div>
+  </div>
+  <div class="form-floating">
+    <div class="form-check">
+      <input class="form-check-input" type="radio" id="radio1" name="radioGroup">
+      <label class="form-check-label" for="radio1">
+        我是企业/商户
+      </label>
+    </div>
+    <div class="form-check">
+      <input class="form-check-input" type="radio" id="radio2" name="radioGroup" checked>
+      <label class="form-check-label" for="radio2">
+        我是普通用户
+      </label>
     </div>
   </div>
   <div class="form-floating">
@@ -84,6 +98,11 @@
     let confirm = document.getElementById('confirmPassword').value
     let email = document.getElementById('email').value;
     let phone = document.getElementById('phone').value;
+    let role = '1';
+
+    if (document.getElementById('radio2').checked) {
+      role = '2';
+    }
 
     if (password !== confirm) {
       event.preventDefault()
@@ -93,7 +112,7 @@
     }
 
     const url = "http://localhost:8080/api/v1/register";
-    const data = { username: username, password: password, email: email, phone: phone };
+    const data = { username: username, password: password, email: email, phone: phone, role: role };
     const params = {
       method: "POST",
       headers: {

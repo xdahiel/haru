@@ -64,11 +64,13 @@
                           '    </div>';
                   } else {
                       console.log(obj.msg)
-                      let token = encodeURIComponent(obj.msg.token)
-                      let email1 = encodeURIComponent(email)
-                      let username = encodeURIComponent(obj.msg.username)
-                      document.cookie = "token=" + token + ';email=' + email1 + ';username=' + username + "; expires=Fri, 31 Dec 9999 23:59:59 GMT; domain=localhost:8080; path=/";;
-                      console.log(document.cookie, email1, username)
+
+                      // let token = encodeURIComponent(obj.msg.token)
+                      // let email1 = encodeURIComponent(obj.msg.user.email)
+                      // let username = encodeURIComponent(obj.msg.user.username)
+                      // let role = encodeURIComponent(obj.msg.user.role)
+                      // let phone = encodeURIComponent(obj.msg.user.phone)
+
                       document.getElementById("done").innerHTML = '<div class="container mt-5">\n' +
                           '        <div class="alert alert-success" role="alert">\n' +
                           '            登录成功！正在跳转到首页，请稍等...\n' +
