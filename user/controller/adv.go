@@ -109,3 +109,41 @@ func AddAdvertise(c *gin.Context) {
 		"msg":  "",
 	})
 }
+
+func DeleteAdv(c *gin.Context) {
+	sid := c.Query("id")
+	id, err := strconv.Atoi(sid)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": "2001",
+			"msg":  "参数不合法!",
+		})
+		logs.Error("Invalid parameter: %v", err)
+		return
+	}
+
+	cur, err := model.FindAdvertiseById(id)
+	if err != nil || cur == nil || len(cur) == 0 {
+		c.JSON(http.StatusOK, gin.H{
+			"code": "2001",
+			"msg":  "该条信息不存在！",
+		})
+		logs.Error("Failed found advertise: %v", err)
+		return
+	}
+
+	err = model.DeleteAdvertiseById(id)
+	if err != nil {
+		c.JSON(http.StatusOK, gin.H{
+			"code": "2001",
+			"msg":  "删除失败!",
+		})
+		logs.Error("Failed delete advertise: %v", err)
+		return
+	}
+
+	c.JSON(http.StatusOK, gin.H{
+		"code": "2000",
+		"msg":  "",
+	})
+}

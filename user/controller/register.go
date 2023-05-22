@@ -3,6 +3,7 @@ package controller
 import (
 	"github.com/gin-gonic/gin"
 	"haru/common"
+	"haru/common/validator"
 	"haru/logs"
 	"haru/user/model"
 	"net/http"
@@ -28,21 +29,15 @@ func Register(c *gin.Context) {
 	}
 	logs.Info("username: %v, password: %v", rr.Username, rr.Password)
 
-	if len(rr.Username) < 6 || len(rr.Username) > 20 {
+	if !validator.ValidateUsername(rr.Username) ||
+		!validator.ValidateEmail(rr.Email) ||
+		!validator.ValidatePhone(rr.Phone) ||
+		!validator.ValidatePassword(rr.Password) {
 		c.JSON(http.StatusOK, gin.H{
-			"code": "2002",
-			"msg":  "用户名应在6~20位之间",
+			"code": "2001",
+			"msg":  "参数错误!",
 		})
-		logs.Info("用户输入不规范")
-		return
-	}
-
-	if len(rr.Password) < 6 || len(rr.Password) > 20 {
-		c.JSON(http.StatusOK, gin.H{
-			"code": "2002",
-			"msg":  "密码应在6~20位之间",
-		})
-		logs.Info("密码输入不规范")
+		logs.Error("Invalid parameter format.")
 		return
 	}
 

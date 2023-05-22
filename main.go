@@ -86,6 +86,7 @@ func render(r *gin.Engine) {
 		c.HTML(http.StatusOK, "login.html", gin.H{})
 	})
 	r.GET("/company.html", userController.Company)
+	r.GET("/user.html", userController.User)
 	r.GET("/result.html", func(ctx *gin.Context) {
 		query := ctx.Query("query")
 		assoTypes.GetTrie().Insert(query)

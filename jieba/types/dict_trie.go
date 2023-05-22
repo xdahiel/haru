@@ -24,16 +24,16 @@ const (
 )
 
 type DictTrie struct {
-	freqSum                   float64
-	minWeight                 float64
-	maxWeight                 float64
-	midWeight                 float64
-	userWordDefaultWeight     float64
-	userDictSingleChineseWord RSet
+	freqSum                   float64 // 词频和
+	minWeight                 float64 // 当前最小权重
+	maxWeight                 float64 // 当前最大权重
+	midWeight                 float64 // 当前权重中位数
+	userWordDefaultWeight     float64 // 用户自定义的权重值
+	userDictSingleChineseWord RSet    // 用户自定义的汉字
 
 	trie           *Trie
-	staticNodeInfo []DictUnit
-	activeNodeInfo []DictUnit
+	staticNodeInfo []DictUnit // 静态节点信息
+	activeNodeInfo []DictUnit // 动态节点信息
 }
 
 func NewDictTrie(dictPath, userDictPath string, option UserWordWeightOption) *DictTrie {

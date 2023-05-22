@@ -10,14 +10,18 @@ const (
 	maxWordLength = 512
 )
 
+// 有向无环图节点
 type DictUnit struct {
-	word   Rune
-	weight float64
-	tag    Rune
+	word   Rune    // 汉字
+	weight float64 // 权重
+	tag    Rune    // 标记
 }
 
+// 有向无环图
 type Dag struct {
-	r     rune
+	r rune // 汉字
+
+	// 下一个汉字，可能有多个
 	nexts []struct {
 		offset uint
 		info   *DictUnit
@@ -49,8 +53,8 @@ func NewDag() *Dag {
 }
 
 type TrieNode struct {
-	next map[rune]*TrieNode
-	val  *DictUnit
+	next map[rune]*TrieNode // 下一个树上节点
+	val  *DictUnit          // 当前节点权值
 }
 
 func NewTrieNode() *TrieNode {
@@ -61,7 +65,7 @@ func NewTrieNode() *TrieNode {
 }
 
 type Trie struct {
-	root *TrieNode
+	root *TrieNode // 根节点
 }
 
 func NewTrie(keys []Rune, vals []*DictUnit) *Trie {

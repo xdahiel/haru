@@ -56,3 +56,24 @@ func FindUserByID(id int) ([]*User, error) {
 	}
 	return u, nil
 }
+
+func UpdateUser(u *User) error {
+	db := common.GetMysqlDB()
+	err := db.Model(new(User)).Where("id = ?", u.ID).Updates(map[string]interface{}{
+		"id":       u.ID,
+		"username": u.Username,
+		"phone":    u.Phone,
+	}).Error
+
+	return err
+}
+
+func UpdateUserPassword(u *User) error {
+	db := common.GetMysqlDB()
+	err := db.Model(new(User)).Where("id = ?", u.ID).Updates(map[string]interface{}{
+		"id":       u.ID,
+		"password": u.Password,
+	}).Error
+
+	return err
+}

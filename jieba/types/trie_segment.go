@@ -27,17 +27,17 @@ func (ts *trieSegment) Cut(sentence Rune) []segmentResp {
 }
 
 func (ts *trieSegment) cut(sentence Rune, length int) []segmentResp {
-	f := NewPreFilter(sentence, ts.symbols)
+	f := NewPreFilter(sentence, ts.symbols) // 获取过滤器
 	res := make([]segmentResp, 0)
 
 	var l, r int
 	for f.HasNext() {
-		l, r = f.Next()
-		dags := ts.dictTrie.findAsDagWithMaxWordLength(sentence[l:r], length)
-		ts.calcDP(dags)
+		l, r = f.Next()                                                       // 获取下一个可分词区间
+		dags := ts.dictTrie.findAsDagWithMaxWordLength(sentence[l:r], length) // 在树上构建有向无环图
+		ts.calcDP(dags)                                                       // 初始化动态规划参数
 
 		offset := 0
-		cutRes := ts.cutByDag(sentence[l:r], dags)
+		cutRes := ts.cutByDag(sentence[l:r], dags) // 使用动态规划计算出权重最高的分词序列
 		for _, cut := range cutRes {
 			res = append(res, segmentResp{
 				Text:  cut,

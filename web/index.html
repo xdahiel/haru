@@ -77,6 +77,9 @@
         if (event.key === "Enter") {
             event.preventDefault();
             let val = document.getElementById('search').value;
+            if (val === '') {
+                return
+              }
             console.log(val)
             window.location.href = "http://localhost:8080/result.html?query=" + val
         }
@@ -168,7 +171,7 @@
             tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="company.html?id=' + id + '"> ' + username + '</a>' +
                 '<a class="nav-link fw-bold py-1 px-0" href="#" onclick="logout()">退出登录</a>';
         } else {
-            tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="#"> ' + username + '</a>' +
+            tmpDiv.innerHTML = '<a class="nav-link fw-bold py-1 px-0" href="user.html?id=' + id + '"> ' + username + '</a>' +
                 '<a class="nav-link fw-bold py-1 px-0" href="#" onclick="logout()">退出登录</a>';
         }
     } else {
@@ -179,7 +182,7 @@
 <script>
     let logout = function () {
         document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
-        location.reload()
+        location.reload();
     }
 
     const inputElement = document.getElementById("search");

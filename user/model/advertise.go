@@ -56,3 +56,24 @@ func FindAdvertiseByUid(uid int) ([]*Advertise, error) {
 	}
 	return ads, nil
 }
+
+func FindAdvertiseById(uid int) ([]*Advertise, error) {
+	db := common.GetMysqlDB()
+	var ads []*Advertise
+	err := db.Model(new(Advertise)).Where("id = ?", uid).Find(&ads).Error
+	if err != nil {
+		logs.Error("Fatal find advertise: %v", err)
+		return nil, err
+	}
+	return ads, nil
+}
+
+func DeleteAdvertiseById(uid int) error {
+	db := common.GetMysqlDB()
+	err := db.Model(new(Advertise)).Where("id = ?", uid).Delete(new(Advertise)).Error
+	if err != nil {
+		logs.Error("Fatal delete advertise: %v", err)
+		return err
+	}
+	return nil
+}

@@ -24,5 +24,8 @@ func InitUserRouter(v1 *gin.RouterGroup) {
 	{
 		v1.POST("/upload", controller.Upload)
 		v1.POST("/addAdv", controller.AddAdvertise)
+		v1.POST("/delAdv", controller.DeleteAdv)
+		v1.POST("/updateUserInfo", controller.UpdateUserInfo)
+		v1.POST("/updatePwd", controller.UpdateUserPassword)
 	}
 }

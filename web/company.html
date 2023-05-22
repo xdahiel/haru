@@ -8,6 +8,8 @@
     <title>个人主页</title>
     <link href="/static/assets/dist/css/bootstrap.min.css" rel="stylesheet">
     <script src="/static/assets/dist/js/axios.min.js"></script>
+    <script src="/static/bootstrap/js/bootstrap.min.js"></script>
+    <script src="/static/assets/dist/js/jquery-3.6.4.min.js"></script>
     <style>
         .bd-placeholder-img {
             font-size: 1.125rem;
@@ -131,7 +133,7 @@
                 <div class="bd-example-snippet bd-code-snippet"><div class="bd-example">
                     <label for="ele1" class="form-label">用户名</label>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="ele1" aria-describedby="basic-addon3" readonly value="{{.user.Username}}">
+                        <input type="text" class="form-control" id="ele1" aria-describedby="basic-addon3" value="{{.user.Username}}">
                     </div>
                     <label for="ele2" class="form-label">电子邮箱</label>
                     <div class="input-group mb-3">
@@ -139,7 +141,7 @@
                     </div>
                     <label for="ele3" class="form-label">手机号</label>
                     <div class="input-group mb-3">
-                        <input type="text" class="form-control" id="ele3" aria-describedby="basic-addon3" readonly value="{{.user.Phone}}">
+                        <input type="text" class="form-control" id="ele3" aria-describedby="basic-addon3" value="{{.user.Phone}}">
                     </div>
                     <div class="form-floating">
                         <div class="form-check">
@@ -148,16 +150,38 @@
                                 我是企业/商户
                             </label>
                         </div>
-                        <div class="form-check">
-                            <input class="form-check-input" type="radio" id="radio2" name="radioGroup" readonly>
-                            <label class="form-check-label" for="radio2">
-                                我是普通用户
-                            </label>
-                        </div>
                     </div>
+                    <button class="w-25 btn btn-primary btn-lg" style="margin-left: 400px" onclick="updateInfo({{.user.ID}})">修改信息</button>
+                    <button id="changePasswordButton" class="btn btn-primary" onclick="updatePwd({{.user.ID}})">修改密码</button>
 
                 </div></div>
 
+                <div id="passwordModal" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">修改密码</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <div class="form-group">
+                                    <label for="currentPassword">原始密码</label>
+                                    <input type="password" class="form-control" id="currentPassword">
+                                </div>
+                                <div class="form-group">
+                                    <label for="newPassword">新密码</label>
+                                    <input type="password" class="form-control" id="newPassword">
+                                </div>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal">取消</button>
+                                <button type="button" class="btn btn-primary" id="savePasswordButton" onclick="updatePassword()">保存</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </article>
 
@@ -188,14 +212,31 @@
                             <td>{{$v.Keyword}}</td>
                             <td>{{$v.Handle}}</td>
                             <td><a href="{{$v.Link}}">{{$v.Link}}</a> </td>
+                            <td><button id="deleteButton" class="btn btn-danger" onclick="deleteAdv({{$v.Id}})">删除</button></td>
                         </tr>
                         {{end}}
                         </tbody>
                     </table>
                 </div></div>
-
-
-
+                <div id="confirmationModal" class="modal fade" tabindex="-1" role="dialog">
+                    <div class="modal-dialog" role="document">
+                        <div class="modal-content">
+                            <div class="modal-header">
+                                <h5 class="modal-title">确认删除</h5>
+                                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                                    <span aria-hidden="true">&times;</span>
+                                </button>
+                            </div>
+                            <div class="modal-body">
+                                <p>您确定要删除吗？</p>
+                            </div>
+                            <div class="modal-footer">
+                                <button type="button" class="btn btn-secondary" data-dismiss="modal" onclick="delAdv(1)">否</button>
+                                <button type="button" class="btn btn-danger" id="confirmDeleteButton" onclick="delAdv(2)">是</button>
+                            </div>
+                        </div>
+                    </div>
+                </div>
             </div>
         </article>
         <article class="my-3" id="figures">
@@ -223,6 +264,9 @@
             </div>
         </article>
     </section>
+
+    <input id="readyToDel" hidden="hidden">
+    <input id="updPwd" hidden="hidden">
 
 </div>
 <div hidden="hidden">
@@ -277,6 +321,112 @@
             .catch(error => {
                 console.error(error)
             })
+    }
+</script>
+
+<script>
+    let deleteAdv = function (id) {
+        $('#confirmationModal').modal('show');
+        document.getElementById('readyToDel').value = id;
+    }
+
+    let delAdv = function (k) {
+        if (k === 1) {
+            $('#confirmationModal').modal('hide');
+        } else {
+            let id = document.getElementById('readyToDel').value;
+            let jwtToken = getCookie('token');
+            axios({
+                method: 'post',
+                url: 'http://localhost:8080/api/v2/delAdv?id='+id,
+                headers: {
+                    "Content-type": "application/json; charset=utf-8",
+                    'Authorization': `Bearer ${jwtToken}`
+                }
+            }).then(response => {
+                if (response.data.code !== "2000") {
+                    alert(response.data.msg)
+                } else {
+                    location.reload();
+                }
+            }).catch(error => {
+                console.error(error)
+            })
+        }
+    }
+</script>
+
+<script>
+    let updateInfo = function (id) {
+        const new_username = document.getElementById('ele1').value;
+        const new_phone = document.getElementById('ele3').value;
+
+        let jwtToken = getCookie('token');
+        axios({
+            method: 'post',
+            url: 'http://localhost:8080/api/v2/updateUserInfo?id='+id,
+            data: {
+                id: id,
+                username: new_username,
+                phone: new_phone,
+            },
+            headers: {
+                "Content-type": "application/json; charset=utf-8",
+                'Authorization': `Bearer ${jwtToken}`
+            }
+        }).then(response => {
+            if (response.data.code !== "2000") {
+                alert(response.data.msg)
+            } else {
+                window.location.href = "http://localhost:8080/company.html?id=" + id
+            }
+        }).catch(error => {
+            console.error(error)
+        })
+    }
+
+    let updatePwd = function (id) {
+        $('#passwordModal').modal('show');
+        document.getElementById('updPwd').value = id;
+    }
+
+    let updatePassword = function () {
+        let currentPwd = document.getElementById('currentPassword').value;
+        let newPwd = document.getElementById('newPassword').value;
+        let id = document.getElementById('updPwd').value;
+
+        if (currentPwd === newPwd) {
+            alert('新密码和原密码一致！')
+            return
+        }
+
+        let jwtToken = getCookie('token');
+        axios({
+            method: 'post',
+            url: 'http://localhost:8080/api/v2/updatePwd',
+            data: {
+                id: parseInt(id),
+                oldPassword: currentPwd,
+                newPassword: newPwd,
+            },
+            headers: {
+                "Content-type": "application/json; charset=utf-8",
+                'Authorization': `Bearer ${jwtToken}`
+            }
+        }).then(response => {
+            if (response.data.code !== "2000") {
+                alert(response.data.msg)
+            } else {
+                $('#passwordModal').modal('hide');
+                setTimeout(function (){
+                    window.location.replace('http://localhost:8080')
+                }, 2000)
+                document.cookie = "token=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/;";
+                location.reload();
+            }
+        }).catch(error => {
+            console.error(error)
+        })
     }
 </script>
 </body>

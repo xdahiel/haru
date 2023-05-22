@@ -2,15 +2,16 @@ package types
 
 import "sync"
 
+// 支持UTF-8编码的字符串
 type uString []rune
 
 type uTrieNode struct {
-	isEnd    bool
-	children map[rune]*uTrieNode
+	isEnd    bool                // 判断以当前字符为结尾的路径是否是一条语句
+	children map[rune]*uTrieNode // 下一个节点
 }
 
 type UTrie struct {
-	root *uTrieNode
+	root *uTrieNode // 字典树根节点
 }
 
 func NewUTrie() *UTrie {
