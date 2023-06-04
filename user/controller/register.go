@@ -29,10 +29,10 @@ func Register(c *gin.Context) {
 	}
 	logs.Info("username: %v, password: %v", rr.Username, rr.Password)
 
-	if !validator.ValidateUsername(rr.Username) ||
-		!validator.ValidateEmail(rr.Email) ||
-		!validator.ValidatePhone(rr.Phone) ||
-		!validator.ValidatePassword(rr.Password) {
+	if (!validator.ValidateUsername(rr.Username)) ||
+		(!validator.ValidateEmail(rr.Email)) ||
+		(!validator.ValidatePhone(rr.Phone)) ||
+		(!validator.ValidatePassword(rr.Password)) {
 		c.JSON(http.StatusOK, gin.H{
 			"code": "2001",
 			"msg":  "参数错误!",
