@@ -6,4 +6,3 @@
 
 * 支持中文搜索。中文分词算法用Go重写[jieba](https://github.com/fxsjy/jieba)分词。
 * 并发搜索。使用Goroutine更加轻量、并发度更大。
-* 完全开源，完全免费。
